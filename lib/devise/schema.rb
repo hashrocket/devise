@@ -30,6 +30,12 @@ module Devise
       apply_schema :confirmation_sent_at, DateTime
     end
 
+    # Creates fb_user_id and email_hash.
+    def facebook_connectable
+      apply_schema :fb_user_id, Integer
+      apply_schema :email_hash, String
+    end
+
     # Creates reset_password_token.
     def recoverable
       apply_schema :reset_password_token, String, :limit => 20
