@@ -68,7 +68,6 @@ module Devise
           return unless authentication_keys.all? { |k| attributes[k].present? }
           conditions = attributes.slice(*authentication_keys)
           resource = find_for_authentication(conditions)
-          valid_for_authentication(resource, attributes) if resource
         end
 
         # Hook to serialize user into session. Overwrite if you want.

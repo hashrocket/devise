@@ -3,14 +3,15 @@ module Devise
   autoload :Mapping, 'devise/mapping'
   autoload :FailureApp, 'devise/failure_app'
 
-  ALL = [:authenticatable, :confirmable, :recoverable, :rememberable,
-         :timeoutable, :trackable, :validatable].freeze
+  ALL = [:authenticatable, :confirmable, :facebook_connectable, :recoverable,
+         :rememberable, :timeoutable, :trackable, :validatable].freeze
 
   # Maps controller names to devise modules
   CONTROLLERS = {
     :sessions => :authenticatable,
     :passwords => :recoverable,
-    :confirmations => :confirmable
+    :confirmations => :confirmable,
+    :facebook_connects => :facebook_connectable
   }.freeze
 
   STRATEGIES  = [:authenticatable].freeze

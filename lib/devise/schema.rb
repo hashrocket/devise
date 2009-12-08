@@ -30,10 +30,9 @@ module Devise
       apply_schema :confirmation_sent_at, DateTime
     end
 
-    # Creates fb_user_id and email_hash.
+    # Creates facebook_uid.
     def facebook_connectable
-      apply_schema :fb_user_id, Integer
-      apply_schema :email_hash, String
+      apply_schema :facebook_uid, String
     end
 
     # Creates reset_password_token.

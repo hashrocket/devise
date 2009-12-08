@@ -8,6 +8,10 @@ class Confirmable < User
   devise :authenticatable, :confirmable
 end
 
+class FacebookConnectable < User
+  devise :facebook_connectable
+end
+
 class Recoverable < User
   devise :authenticatable, :recoverable
 end
@@ -68,6 +72,10 @@ class ActiveRecordTest < ActiveSupport::TestCase
     assert_include_modules Confirmable, :authenticatable, :confirmable
   end
 
+  test 'add facebook connectable module only' do
+    assert_include_modules FacebookConnectable, :facebook_connectable
+  end
+
   test 'add recoverable module only' do
     assert_include_modules Recoverable, :authenticatable, :recoverable
   end
@@ -90,11 +98,11 @@ class ActiveRecordTest < ActiveSupport::TestCase
 
   test 'add all modules' do
     assert_include_modules Devisable,
-      :authenticatable, :confirmable, :recoverable, :rememberable, :trackable, :timeoutable, :validatable
+      :authenticatable, :confirmable, :facebook_connectable, :recoverable, :rememberable, :trackable, :timeoutable, :validatable
   end
 
   test 'configure modules with except option' do
-    assert_include_modules Exceptable, :authenticatable, :confirmable, :trackable, :timeoutable
+    assert_include_modules Exceptable, :authenticatable, :confirmable, :facebook_connectable, :trackable, :timeoutable
   end
 
   test 'set a default value for stretches' do
