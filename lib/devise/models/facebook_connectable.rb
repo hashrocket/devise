@@ -42,8 +42,8 @@ module Devise
         # authenticated user if it's valid or nil. Attributes are by default
         # :email and :password, but the latter is always required.
         def fb_authenticate(attributes={})
-          return unless attributes[:uid]
-          conditions = "facebook_uid = '#{attributes[:uid]}'"
+          return unless attributes[:facebook_uid]
+          conditions = "facebook_uid = '#{attributes[:facebook_uid]}'"
           find_for_authentication(conditions)
         end
 

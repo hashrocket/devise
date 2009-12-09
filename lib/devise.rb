@@ -14,7 +14,7 @@ module Devise
     :facebook_connects => :facebook_connectable
   }.freeze
 
-  STRATEGIES  = [:authenticatable].freeze
+  STRATEGIES  = [:authenticatable, :facebook_connectable].freeze
   SERIALIZERS = [:authenticatable, :rememberable].freeze
   TRUE_VALUES = [true, 1, '1', 't', 'T', 'true', 'TRUE'].freeze
 

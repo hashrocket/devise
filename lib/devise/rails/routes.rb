@@ -119,8 +119,8 @@ module ActionController::Routing
         end
 
         def facebook_connectable(routes, mapping)
-          # routes.resource :facebook_connects, :only => :new
           routes.connect '/facebook_connect', :controller => 'facebook_connects', :action => 'new'
+          routes.connect '/facebook_connect_create', :controller => 'facebook_connects', :action => 'create', :canvas => false
         end
     end
   end

@@ -1,12 +1,11 @@
 module Devise
   module Strategies
-    # Default strategy for signing in a user, based on his email and password.
-    # Redirects to sign_in page if it's not authenticated
+    # Strategy to connect via facebook_uid if it exists
     class FacebookConnectable < Warden::Strategies::Base
       include Devise::Strategies::Base
 
       def valid?
-        super && params[scope] && params[scope][:uid].present?
+        super && params[scope] && params[scope][:facebook_uid].present?
       end
 
       # Authenticate a user based on email and password params, returning to warden
@@ -16,7 +15,7 @@ module Devise
         if resource = mapping.to.fb_authenticate(params[scope])
           success!(resource)
         else
-          fail!(:invalid)
+          redirect!("/#{scope.to_s.pluralize}/facebook_connect_create", params)
         end
       end
     end
