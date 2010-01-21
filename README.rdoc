@@ -18,6 +18,7 @@ Right now it's composed of nine modules:
 * Timeoutable: expires sessions without activity in a certain period of time.
 * Lockable: takes care of locking an account based on the number of failed sign in attempts. Handles unlock via expire and email.
 * Activatable: if you need to activate accounts by other means, which are not through confirmation, use this module.
+* FacebookConnectable: allow accounts to be created with facebook connect as well.
 
 There's an example application using Devise at http://github.com/plataformatec/devise_example .
 
@@ -61,7 +62,7 @@ Devise must be set up within the model (or models) you want to use, and devise r
 We're assuming here you want a User model with some modules, as outlined below:
 
   class User < ActiveRecord::Base
-    devise :authenticatable, :confirmable, :recoverable, :rememberable, :trackable, :validatable
+    devise :authenticatable, :confirmable, :recoverable, :rememberable, :trackable, :validatable, :facebook_connectable
   end
 
 After you choose which modules to use, you need to setup your migrations. Luckily, devise has some helpers to save you from this boring work:
@@ -72,6 +73,7 @@ After you choose which modules to use, you need to setup your migrations. Luckil
     t.recoverable
     t.rememberable
     t.trackable
+    t.facebook_connectable
     t.timestamps
   end
 
