@@ -22,50 +22,8 @@ class ActiveRecordTest < ActiveSupport::TestCase
     end
   end
 
-<<<<<<< HEAD:test/models_test.rb
-  test 'include by default authenticatable only' do
-    assert_include_modules Authenticatable, :authenticatable
-  end
-
-  test 'add confirmable module only' do
-    assert_include_modules Confirmable, :authenticatable, :confirmable
-  end
-
-  test 'add facebook connectable module only' do
-    assert_include_modules FacebookConnectable, :facebook_connectable
-  end
-
-  test 'add recoverable module only' do
-    assert_include_modules Recoverable, :authenticatable, :recoverable
-  end
-
-  test 'add rememberable module only' do
-    assert_include_modules Rememberable, :authenticatable, :rememberable
-  end
-
-  test 'add trackable module only' do
-    assert_include_modules Trackable, :authenticatable, :trackable
-  end
-
-  test 'add timeoutable module only' do
-    assert_include_modules Timeoutable, :authenticatable, :timeoutable
-  end
-
-  test 'add validatable module only' do
-    assert_include_modules Validatable, :authenticatable, :validatable
-  end
-
-  test 'add all modules' do
-    assert_include_modules Devisable,
-      :authenticatable, :confirmable, :facebook_connectable, :recoverable, :rememberable, :trackable, :timeoutable, :validatable
-  end
-
-  test 'configure modules with except option' do
-    assert_include_modules Exceptable, :authenticatable, :confirmable, :facebook_connectable, :trackable, :timeoutable
-=======
   test 'add modules cherry pick' do
     assert_include_modules Admin, :authenticatable, :timeoutable
->>>>>>> upstream/master:test/models_test.rb
   end
 
   test 'set a default value for stretches' do
