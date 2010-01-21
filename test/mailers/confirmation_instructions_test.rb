@@ -4,7 +4,7 @@ class ConfirmationInstructionsTest < ActionMailer::TestCase
 
   def setup
     setup_mailer
-    DeviseMailer.sender = 'test@example.com'
+    Devise.mailer_sender = 'test@example.com'
   end
 
   def user
@@ -55,5 +55,17 @@ class ConfirmationInstructionsTest < ActionMailer::TestCase
     host = ActionMailer::Base.default_url_options[:host]
     confirmation_url_regexp = %r{<a href=\"http://#{host}/users/confirmation\?confirmation_token=#{user.confirmation_token}">}
     assert_match confirmation_url_regexp, mail.body
+  end
+
+  test 'renders a scoped if scoped_views is set to true' do
+    swap Devise, :scoped_views => true do
+      assert_equal user.email, mail.body
+    end
+  end
+
+  test 'mailer sender accepts a proc' do
+    swap Devise, :mailer_sender => lambda { "another@example.com" } do
+      assert_equal ['another@example.com'], mail.from
+    end
   end
 end

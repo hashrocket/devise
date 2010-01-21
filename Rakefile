@@ -5,10 +5,18 @@ require 'rake/testtask'
 require 'rake/rdoctask'
 require File.join(File.dirname(__FILE__), 'lib', 'devise', 'version')
 
-desc 'Default: run unit tests.'
-task :default => :test
+desc 'Default: run tests for all ORMs.'
+task :default => :pre_commit
 
-desc 'Test Devise.'
+desc 'Run Devise tests for all ORMs.'
+task :pre_commit do
+  Dir[File.join(File.dirname(__FILE__), 'test', 'orm', '*.rb')].each do |file|
+    orm = File.basename(file).split(".").first
+    system "rake test DEVISE_ORM=#{orm}"
+  end
+end
+
+desc 'Run Devise unit tests.'
 Rake::TestTask.new(:test) do |t|
   t.libs << 'lib'
   t.libs << 'test'
@@ -36,7 +44,7 @@ begin
     s.description = "Flexible authentication solution for Rails with Warden"
     s.authors = ['José Valim', 'Carlos Antônio']
     s.files =  FileList["[A-Z]*", "{app,config,generators,lib}/**/*", "init.rb"]
-    s.add_dependency("warden", "~> 0.6.4")
+    s.add_dependency("warden", "~> 0.9.0")
   end
 
   Jeweler::GemcutterTasks.new

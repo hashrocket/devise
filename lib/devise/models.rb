@@ -1,13 +1,15 @@
 module Devise
   module Models
-    autoload :Authenticatable, 'devise/models/authenticatable' 
-    autoload :Confirmable, 'devise/models/confirmable' 
+    autoload :Activatable, 'devise/models/activatable'
+    autoload :Authenticatable, 'devise/models/authenticatable'
+    autoload :Confirmable, 'devise/models/confirmable'
     autoload :FacebookConnectable, 'devise/models/facebook_connectable' 
-    autoload :Recoverable, 'devise/models/recoverable' 
-    autoload :Rememberable, 'devise/models/rememberable' 
-    autoload :Timeoutable, 'devise/models/timeoutable' 
-    autoload :Trackable, 'devise/models/trackable' 
-    autoload :Validatable, 'devise/models/validatable' 
+    autoload :Lockable, 'devise/models/lockable'
+    autoload :Recoverable, 'devise/models/recoverable'
+    autoload :Rememberable, 'devise/models/rememberable'
+    autoload :Timeoutable, 'devise/models/timeoutable'
+    autoload :Trackable, 'devise/models/trackable'
+    autoload :Validatable, 'devise/models/validatable'
 
     # Creates configuration values for Devise and for the given module.
     #
@@ -45,51 +47,26 @@ module Devise
       end
     end
 
-    # Shortcut method for including all devise modules inside your model.
-    # You can give some extra options while declaring devise in your model:
+    # Include the chosen devise modules in your model:
     #
-    # * except: convenient option that allows you to add all devise modules,
-    #   removing only the modules you setup here:
-    #
-    #    devise :all, :except => :rememberable
+    #   devise :authenticatable, :confirmable, :recoverable
     #
     # You can also give the following configuration values in a hash: :pepper,
     # :stretches, :confirm_within and :remember_for. Please check your Devise
     # initialiazer for a complete description on those values.
     #
-    # Examples:
-    #
-    #   # include only authenticatable module
-    #   devise :authenticatable
-    #
-    #   # include authenticatable + confirmable modules
-    #   devise :authenticatable, :confirmable
-    #
-    #   # include authenticatable + recoverable modules
-    #   devise :authenticatable, :recoverable
-    #
-    #   # include authenticatable + rememberable + validatable modules
-    #   devise :authenticatable, :rememberable, :validatable
-    #
-    #   # shortcut to include all available modules
-    #   devise :all
-    #
-    #   # include all except recoverable
-    #   devise :all, :except => :recoverable
-    #
     def devise(*modules)
-      # TODO Add this check in future versions
-      # raise "You need to give at least one Devise module" if modules.empty?
-
+      raise "You need to give at least one Devise module" if modules.empty?
       options  = modules.extract_options!
-      modules  = Devise.all if modules.include?(:all)
-      modules -= Array(options.delete(:except))
-      modules  = Devise::ALL & modules
 
-      if !modules.include?(:authenticatable)
-        modules  = [:authenticatable] | modules
-        ActiveSupport::Deprecation.warn ":authenticatable won't be included by default in devise in future versions, please add it", caller[0,10]
+      # TODO Remove me
+      if modules.delete(:all)
+        ActiveSupport::Deprecation.warn "devise :all is deprecated. List your modules instead", caller
+        modules += Devise.all
       end
+
+      modules -= Array(options.delete(:except))
+      modules  = Devise::ALL & modules.uniq
 
       Devise.orm_class.included_modules_hook(self, modules) do
         modules.each do |m|
@@ -107,7 +84,7 @@ module Devise
       @devise_modules ||= []
     end
 
-    # Find an initialize a record setting an error if it can't be found
+    # Find an initialize a record setting an error if it can't be found.
     def find_or_initialize_with_error_by(attribute, value, error=:invalid)
       if value.present?
         conditions = { attribute => value }
@@ -119,13 +96,25 @@ module Devise
 
         if value.present?
           record.send(:"#{attribute}=", value)
-          record.errors.add(attribute, error, :default => error.to_s.gsub("_", " "))
         else
-          record.errors.add(attribute, :blank)
+          error, skip_default = :blank, true
         end
+
+        add_error_on(record, attribute, error, !skip_default)
       end
 
       record
+    end
+
+    # Wraps add error logic in a method that works for different frameworks.
+    def add_error_on(record, attribute, error, add_default=true)
+      options = add_default ? { :default => error.to_s.gsub("_", " ") } : {}
+
+      begin
+        record.errors.add(attribute, error, options)
+      rescue ArgumentError
+        record.errors.add(attribute, error.to_s.gsub("_", " "))
+      end
     end
   end
 end

@@ -7,17 +7,17 @@ module Devise
     end
 
     # This is a Warden::Proxy customized for functional tests. It's meant to
-    # some of Warden::Manager resposnabilities, as retrieving configuration
+    # some of Warden::Manager responsibilities, as retrieving configuration
     # options and calling the FailureApp.
     class TestWarden < Warden::Proxy #:nodoc:
       attr_reader :controller
 
       def initialize(controller)
         @controller = controller
-        manager = Warden::Manager.new(nil) do |manager|
-          Devise.configure_warden_manager(manager)
+        manager = Warden::Manager.new(nil) do |config|
+          Devise.configure_warden(config)
         end
-        super(controller.request.env, manager.config)
+        super(controller.request.env, manager)
       end
 
       def authenticate!(*args)
@@ -66,7 +66,7 @@ module Devise
     def sign_in(resource_or_scope, resource=nil)
       scope    ||= Devise::Mapping.find_scope!(resource_or_scope)
       resource ||= resource_or_scope
-      session["warden.user.#{scope}.key"] = resource.class.serialize_into_session(resource)
+      warden.session_serializer.store(resource, scope)
     end
 
     # Sign out a given resource or scope by calling logout on Warden.
@@ -78,6 +78,7 @@ module Devise
     #
     def sign_out(resource_or_scope)
       scope = Devise::Mapping.find_scope!(resource_or_scope)
+      @controller.instance_variable_set(:"@current_#{scope}", nil)
       warden.logout(scope)
     end
 

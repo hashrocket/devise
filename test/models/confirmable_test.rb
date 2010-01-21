@@ -15,7 +15,7 @@ class ConfirmableTest < ActiveSupport::TestCase
     user = create_user
     3.times do
       token = user.confirmation_token
-      user.reset_confirmation!
+      user.resend_confirmation!
       assert_not_equal token, user.confirmation_token
     end
   end
@@ -57,7 +57,7 @@ class ConfirmableTest < ActiveSupport::TestCase
     assert_nil user.errors[:email]
 
     assert_not user.confirm!
-    assert_equal 'already confirmed', user.errors[:email]
+    assert_match /already confirmed/, user.errors[:email]
   end
 
   test 'should find and confirm an user automatically' do
@@ -70,18 +70,19 @@ class ConfirmableTest < ActiveSupport::TestCase
   test 'should return a new record with errors when a invalid token is given' do
     confirmed_user = User.confirm!(:confirmation_token => 'invalid_confirmation_token')
     assert confirmed_user.new_record?
-    assert_equal "is invalid", confirmed_user.errors[:confirmation_token]
+    assert_match /invalid/, confirmed_user.errors[:confirmation_token]
   end
 
   test 'should return a new record with errors when a blank token is given' do
     confirmed_user = User.confirm!(:confirmation_token => '')
     assert confirmed_user.new_record?
-    assert_equal "can't be blank", confirmed_user.errors[:confirmation_token]
+    assert_match /blank/, confirmed_user.errors[:confirmation_token]
   end
 
   test 'should generate errors for a user email if user is already confirmed' do
     user = create_user
-    user.update_attribute(:confirmed_at, Time.now)
+    user.confirmed_at = Time.now
+    user.save
     confirmed_user = User.confirm!(:confirmation_token => user.confirmation_token)
     assert confirmed_user.confirmed?
     assert confirmed_user.errors[:email]
@@ -108,6 +109,17 @@ class ConfirmableTest < ActiveSupport::TestCase
     end
   end
 
+  test 'should not generate a new token neither send e-mail if skip_confirmation! is invoked' do
+    user = new_user
+    user.skip_confirmation!
+
+    assert_email_not_sent do
+      user.save!
+      assert_nil user.confirmation_token
+      assert_not_nil user.confirmed_at
+    end
+  end
+
   test 'should find a user to send confirmation instructions' do
     user = create_user
     confirmation_user = User.send_confirmation_instructions(:email => user.email)
@@ -125,18 +137,11 @@ class ConfirmableTest < ActiveSupport::TestCase
     assert_equal 'not found', confirmation_user.errors[:email]
   end
 
-  test 'should reset confirmation token before send the confirmation instructions email' do
+  test 'should generate a confirmation token before send the confirmation instructions email' do
     user = create_user
     token = user.confirmation_token
     confirmation_user = User.send_confirmation_instructions(:email => user.email)
     assert_not_equal token, user.reload.confirmation_token
-  end
-
-  test 'should reset confirmation status when sending the confirmation instructions' do
-    user = create_user
-    assert_not user.confirmed?
-    confirmation_user = User.send_confirmation_instructions(:email => user.email)
-    assert_not user.reload.confirmed?
   end
 
   test 'should send email instructions for the user confirm it\'s email' do
@@ -168,7 +173,7 @@ class ConfirmableTest < ActiveSupport::TestCase
   test 'should not be able to send instructions if the user is already confirmed' do
     user = create_user
     user.confirm!
-    assert_not user.reset_confirmation!
+    assert_not user.resend_confirmation!
     assert user.confirmed?
     assert_equal 'already confirmed', user.errors[:email]
   end
@@ -216,7 +221,8 @@ class ConfirmableTest < ActiveSupport::TestCase
 
   test 'should not be active without confirmation' do
     user = create_user
-    user.update_attribute(:confirmation_sent_at, nil)
+    user.confirmation_sent_at = nil
+    user.save
     assert_not user.reload.active?
   end
 end

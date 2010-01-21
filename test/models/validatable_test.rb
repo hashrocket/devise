@@ -1,6 +1,7 @@
 require 'test/test_helper'
 
 class ValidatableTest < ActiveSupport::TestCase
+  extend Devise::TestSilencer if [:mongo_mapper, :data_mapper].include?(DEVISE_ORM)
 
   test 'should require email to be set' do
     user = new_user(:email => nil)
@@ -17,7 +18,7 @@ class ValidatableTest < ActiveSupport::TestCase
     user.email = existing_user.email
     assert user.invalid?
     assert user.errors[:email]
-    assert_equal 1, user.errors[:email].to_a.size
+    assert_equal 1, [*user.errors[:email]].size
     assert_equal 'has already been taken', user.errors[:email]
   end
 
@@ -29,7 +30,7 @@ class ValidatableTest < ActiveSupport::TestCase
       user.email = email
       assert user.invalid?, 'should be invalid with email ' << email
       assert user.errors[:email]
-      assert_equal 1, user.errors[:email].to_a.size
+      assert_equal 1, [*user.errors[:email]].size
       assert_equal 'is invalid', user.errors[:email]
     end
   end

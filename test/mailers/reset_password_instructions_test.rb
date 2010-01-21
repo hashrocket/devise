@@ -4,7 +4,7 @@ class ResetPasswordInstructionsTest < ActionMailer::TestCase
 
   def setup
     setup_mailer
-    DeviseMailer.sender = 'test@example.com'
+    Devise.mailer_sender = 'test@example.com'
   end
 
   def user
@@ -58,5 +58,11 @@ class ResetPasswordInstructionsTest < ActionMailer::TestCase
     host = ActionMailer::Base.default_url_options[:host]
     reset_url_regexp = %r{<a href=\"http://#{host}/users/password/edit\?reset_password_token=#{user.reset_password_token}">}
     assert_match reset_url_regexp, mail.body
+  end
+
+  test 'mailer sender accepts a proc' do
+    swap Devise, :mailer_sender => lambda { "another@example.com" } do
+      assert_equal ['another@example.com'], mail.from
+    end
   end
 end

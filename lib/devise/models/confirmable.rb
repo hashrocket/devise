@@ -1,4 +1,4 @@
-require 'devise/hooks/confirmable'
+require 'devise/models/activatable'
 
 module Devise
   module Models
@@ -27,15 +27,16 @@ module Devise
     #   User.find(1).confirm!      # returns true unless it's already confirmed
     #   User.find(1).confirmed?    # true/false
     #   User.find(1).send_confirmation_instructions # manually send instructions
-    #   User.find(1).reset_confirmation! # reset confirmation status and send instructions
+    #   User.find(1).resend_confirmation! # generates a new token and resent it
     module Confirmable
+      include Devise::Models::Activatable
 
       def self.included(base)
         base.class_eval do
           extend ClassMethods
 
-          before_create :generate_confirmation_token
-          after_create  :send_confirmation_instructions
+          before_create :generate_confirmation_token, :if => :confirmation_required?
+          after_create  :send_confirmation_instructions, :if => :confirmation_required?
         end
       end
 
@@ -62,7 +63,7 @@ module Devise
       # Remove confirmation date and send confirmation instructions, to ensure
       # after sending these instructions the user won't be able to sign in without
       # confirming it's account
-      def reset_confirmation!
+      def resend_confirmation!
         unless_confirmed do
           generate_confirmation_token
           save(false)
@@ -70,15 +71,36 @@ module Devise
         end
       end
 
-      # Verify whether a user is active to sign in or not. If the user is
-      # already confirmed, it should never be blocked. Otherwise we need to
-      # calculate if the confirm time has not expired for this user, in other
-      # words, if the confirmation is still valid.
+      # Overwrites active? from Devise::Models::Activatable for confirmation
+      # by verifying whether an user is active to sign in or not. If the user
+      # is already confirmed, it should never be blocked. Otherwise we need to
+      # calculate if the confirm time has not expired for this user.
       def active?
-        confirmed? || confirmation_period_valid?
+        super && (confirmed? || confirmation_period_valid?)
+      end
+
+      # The message to be shown if the account is inactive.
+      def inactive_message
+        if !confirmed?
+          :unconfirmed
+        else
+          super
+        end
+      end
+
+      # If you don't want confirmation to be sent on create, neither a code
+      # to be generated, call skip_confirmation!
+      def skip_confirmation!
+        self.confirmed_at  = Time.now
+        @skip_confirmation = true
       end
 
       protected
+
+        # Callback to overwrite if confirmation is required or not.
+        def confirmation_required?
+          !@skip_confirmation
+        end
 
         # Checks if the confirmation for the user is within the limit time.
         # We do this by calculating if the difference between today and the
@@ -109,7 +131,7 @@ module Devise
           unless confirmed?
             yield
           else
-            errors.add(:email, :already_confirmed, :default => 'already confirmed')
+            self.class.add_error_on(self, :email, :already_confirmed)
             false
           end
         end
@@ -129,7 +151,7 @@ module Devise
         # Options must contain the user email
         def send_confirmation_instructions(attributes={})
           confirmable = find_or_initialize_with_error_by(:email, attributes[:email], :not_found)
-          confirmable.reset_confirmation! unless confirmable.new_record?
+          confirmable.resend_confirmation! unless confirmable.new_record?
           confirmable
         end
 

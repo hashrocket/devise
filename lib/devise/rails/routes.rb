@@ -8,7 +8,7 @@ module ActionController::Routing
       load_routes_without_devise!
       return if Devise.mappings.empty?
 
-      ActionController::Base.send :include, Devise::Controllers::Filters
+      ActionController::Base.send :include, Devise::Controllers::Helpers
       ActionController::Base.send :include, Devise::Controllers::UrlHelpers
 
       ActionView::Base.send :include, Devise::Controllers::UrlHelpers
@@ -79,15 +79,10 @@ module ActionController::Routing
       def devise_for(*resources)
         options = resources.extract_options!
 
-        if singular = options.delete(:singular)
-          ActiveSupport::Deprecation.warn ":singular is deprecated in devise_for, use :scope instead."
-          options[:scope] = singular
-        end
-
         resources.map!(&:to_sym)
         resources.each do |resource|
           mapping = Devise::Mapping.new(resource, options.dup)
-          Warden::Manager.default_scope ||= mapping.name
+          Devise.default_scope ||= mapping.name
           Devise.mappings[mapping.name] = mapping
 
           route_options = mapping.route_options.merge(:path_prefix => mapping.raw_path, :name_prefix => "#{mapping.name}_")
@@ -122,6 +117,11 @@ module ActionController::Routing
           routes.connect '/facebook_connect', :controller => 'facebook_connects', :action => 'new'
           routes.connect '/facebook_connect_create', :controller => 'facebook_connects', :action => 'create', :canvas => false
         end
+
+        def lockable(routes, mapping)
+          routes.resource :unlock, :only => [:new, :create, :show], :as => mapping.path_names[:unlock]
+        end
+
     end
   end
 end

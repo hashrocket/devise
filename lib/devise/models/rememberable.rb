@@ -1,9 +1,8 @@
-require 'digest/sha1'
-require 'devise/serializers/rememberable'
+require 'devise/strategies/rememberable'
+require 'devise/hooks/rememberable'
 
 module Devise
   module Models
-
     # Rememberable manages generating and clearing token for remember the user
     # from a saved cookie. Rememberable also has utility methods for dealing
     # with serializing the user into the cookie and back from the cookie, trying
@@ -75,15 +74,15 @@ module Devise
 
       module ClassMethods
         # Create the cookie key using the record id and remember_token
-        def serialize_into_cookie(rememberable)
-          "#{rememberable.id}::#{rememberable.remember_token}"
+        def serialize_into_cookie(record)
+          "#{record.id}::#{record.remember_token}"
         end
 
         # Recreate the user based on the stored cookie
         def serialize_from_cookie(cookie)
-          rememberable_id, remember_token = cookie.split('::')
-          rememberable = find(:first, :conditions => { :id => rememberable_id }) if rememberable_id
-          rememberable if rememberable.try(:valid_remember_token?, remember_token)
+          record_id, record_token = cookie.split('::')
+          record = find(:first, :conditions => { :id => record_id }) if record_id
+          record if record.try(:valid_remember_token?, record_token)
         end
 
         Devise::Models.config(self, :remember_for)

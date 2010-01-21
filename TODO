@@ -1,2 +1,4 @@
-* Create update_with_password
-* Make test run with different ORMs
+* Make test run with DataMapper
+* Add Registerable support
+* Add http authentication support
+* Extract Activatable tests from Confirmable
