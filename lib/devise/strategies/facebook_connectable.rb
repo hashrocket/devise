@@ -1,9 +1,9 @@
+require 'devise/strategies/base'
+
 module Devise
   module Strategies
     # Strategy to connect via facebook_uid if it exists
-    class FacebookConnectable < Warden::Strategies::Base
-      include Devise::Strategies::Base
-
+    class FacebookConnectable < Base
       def valid?
         super && params[scope] && params[scope][:facebook_uid].present?
       end

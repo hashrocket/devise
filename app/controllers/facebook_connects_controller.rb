@@ -1,5 +1,6 @@
 class FacebookConnectsController < ApplicationController
-  include Devise::Controllers::Helpers
+  include Devise::Controllers::InternalHelpers
+  include Devise::Controllers::Common
 
   # before_filter :require_no_authentication
 

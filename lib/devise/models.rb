@@ -3,7 +3,7 @@ module Devise
     autoload :Activatable, 'devise/models/activatable'
     autoload :Authenticatable, 'devise/models/authenticatable'
     autoload :Confirmable, 'devise/models/confirmable'
-    autoload :FacebookConnectable, 'devise/models/facebook_connectable' 
+    autoload :FacebookConnectable, 'devise/models/facebook_connectable'
     autoload :Lockable, 'devise/models/lockable'
     autoload :Recoverable, 'devise/models/recoverable'
     autoload :Rememberable, 'devise/models/rememberable'

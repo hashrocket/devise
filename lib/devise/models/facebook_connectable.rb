@@ -1,5 +1,4 @@
 require 'devise/strategies/facebook_connectable'
-require 'devise/serializers/facebook_connectable'
 
 module Devise
   module Models
