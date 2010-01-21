@@ -19,12 +19,16 @@ class FacebookConnectsController < ApplicationController
 
   def create
     if params[:session][/\"uid\":(\d+)/]
-      params[resource_name] = {:facebook_uid => $1, :email => '', :encrypted_password => 'fb', :password_salt => 'fb' }
+      params[resource_name] = { :facebook_uid => $1,
+        :email => '',
+        :encrypted_password => 'fb',
+        :password_salt => 'fb' }
     end
-    resource = build_resource
-    resource.save(false)
-    resource.confirmed_at = Time.now
-    resource.confirmation_token = nil
+
+    if build_resource.class.ancestors.include?(Devise::Models::Confirmable)
+      resource.skip_confirmation!
+    end
+
     resource.save(false)
 
     sign_in_and_redirect(resource)
