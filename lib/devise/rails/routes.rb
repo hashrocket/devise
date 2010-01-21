@@ -40,7 +40,7 @@ module ActionController::Routing
       #                        POST /users/password(.:format)         {:controller=>"passwords", :action=>"create"}
       #
       #  # Confirmation routes for Confirmable, if User model has :confirmable configured
-      #  new_user_c, :as => mapping.path_names[:facebook_connect]onfirmation GET  /users/confirmation/new(.:format) {:controller=>"confirmations", :action=>"new"}
+      #  new_user_confirmation GET  /users/confirmation/new(.:format) {:controller=>"confirmations", :action=>"new"}
       #      user_confirmation GET  /users/confirmation(.:format)     {:controller=>"confirmations", :action=>"show"}
       #                        POST /users/confirmation(.:format)     {:controller=>"confirmations", :action=>"create"}
       #
